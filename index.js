@@ -6,22 +6,36 @@ const mongoose=require('mongoose');
 const Dishes=require('./models/dishes');
 const dbname='conFusion';
 const url='mongodb://localhost:27017/conFusion';
-
+var dish_id;
 
 const connect=mongoose.connect(url).then((client)  =>{
     console.log('Conectado al servidor');
     Dishes.create({
-        name: 'Ezequiel',
+        name: 'ing Ezequiel',
         description:'Simeoni'
     })
     .then((dish)=>{
         console.log(dish);//esta es la promise
-        return Dishes.find({}).exec();//devuelve la promise y despues podemos encadenar el metodo a los otros
+
+        return Dishes.findByIdAndUpdate(dish._id,{
+            $set: {description: 'Simeoni Blengino'}
+         }, {
+             new: true //una vez que se actualiza, retornará el doc actualizado
+        })
+        .exec();//devuelve la promise y despues podemos encadenar el metodo a los otros
                 //encuentra todos los documentos
     }) 
-    .then((dishes) => {
-        console.log(dishes);
-
+    .then((dish) => {
+        console.log(dish);
+        dish.comments.push({
+            rating:5,
+            comment:'Agrega doble apellido',
+            author: 'yo'
+        });
+        return dish.save();
+    })
+    .then((dish)=>{
+        console.log(dish);
         return mongoose.connection.collection('dishes').drop();//elimina los documentos
     })
     .then(() => {
